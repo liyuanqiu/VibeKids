@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useProjectStore } from "@/stores/project-store";
+import { useLanguageStore } from "@/stores/language-store";
+import { t } from "@/lib/i18n";
 import { buildIframeHTML, createBlobURL, revokeBlobURL } from "@/lib/runtime/iframe-engine";
 
 export default function PreviewPanel() {
@@ -12,6 +14,7 @@ export default function PreviewPanel() {
 
   const project = useProjectStore((s) => s.project);
   const isFixing = useProjectStore((s) => s.isFixing);
+  const language = useLanguageStore((s) => s.language);
 
   // Get code for current version
   const currentCode = project?.versions.length
@@ -93,14 +96,14 @@ export default function PreviewPanel() {
           />
           <span className="text-xs text-gray-400">
             {isFixing
-              ? "小V 正在修修补补..."
+              ? t("preview.fixing", language)
               : status === "running"
-              ? "运行中"
+              ? t("preview.running", language)
               : status === "loading"
-              ? "加载中..."
+              ? t("preview.loading", language)
               : status === "error"
-              ? "出错啦"
-              : "等待开始"}
+              ? t("preview.error", language)
+              : t("preview.idle", language)}
           </span>
         </div>
 
@@ -116,7 +119,7 @@ export default function PreviewPanel() {
             >
               {project.versions.map((v) => (
                 <option key={v.id} value={v.number}>
-                  版本 {v.number}
+                  {t("preview.version", language)} {v.number}
                 </option>
               ))}
             </select>
@@ -132,7 +135,7 @@ export default function PreviewPanel() {
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
             </svg>
-            运行
+            {t("preview.run", language)}
           </button>
         </div>
       </div>
@@ -143,8 +146,8 @@ export default function PreviewPanel() {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <div className="text-6xl mb-4">🎨</div>
-              <p className="text-gray-500 text-sm">你的作品会在这里出现</p>
-              <p className="text-gray-600 text-xs mt-1">告诉小V你想做什么吧！</p>
+              <p className="text-gray-500 text-sm">{t("preview.emptyTitle", language)}</p>
+              <p className="text-gray-600 text-xs mt-1">{t("preview.emptySubtitle", language)}</p>
             </div>
           </div>
         ) : null}
@@ -153,8 +156,8 @@ export default function PreviewPanel() {
           <div className="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-20">
             <div className="text-center">
               <div className="text-5xl mb-3 animate-bounce">🔧</div>
-              <p className="text-white text-sm font-medium">小V 正在努力修修补补...</p>
-              <p className="text-gray-400 text-xs mt-1">马上就好！</p>
+              <p className="text-white text-sm font-medium">{t("preview.fixingOverlay", language)}</p>
+              <p className="text-gray-400 text-xs mt-1">{t("preview.fixingSoon", language)}</p>
             </div>
           </div>
         )}
@@ -163,7 +166,7 @@ export default function PreviewPanel() {
           <div className="absolute top-2 left-2 right-2 bg-red-500/90 text-white text-xs px-3 py-2 rounded-lg z-10">
             ⚠️ {errorMsg}
             <button onClick={handleRerun} className="ml-2 underline">
-              重试
+              {t("preview.retry", language)}
             </button>
           </div>
         )}
@@ -173,7 +176,7 @@ export default function PreviewPanel() {
           sandbox="allow-scripts"
           className="w-full h-full border-0"
           style={{ display: status === "empty" ? "none" : "block", background: "#1a1a2e" }}
-          title="作品预览"
+          title="Preview"
         />
       </div>
     </div>

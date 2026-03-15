@@ -5,6 +5,7 @@ import { useProjectStore } from "@/stores/project-store";
 import { useDebugStore } from "@/stores/debug-store";
 import { useLanguageStore, LANGUAGE_NAMES } from "@/stores/language-store";
 import { useVoice, speakText } from "@/lib/voice/use-voice";
+import { t } from "@/lib/i18n";
 import type { AIResponse } from "@/types";
 
 interface APIUsage {
@@ -152,7 +153,7 @@ export default function ChatPanel() {
         }
       } catch (err) {
         console.error("Send message error:", err);
-        addMessage("assistant", "哎呀，小V 遇到了一点小问题，再试一次吧！");
+        addMessage("assistant", t("chat.error", useLanguageStore.getState().language));
       } finally {
         setLoading(false);
       }
@@ -163,9 +164,9 @@ export default function ChatPanel() {
   /** Auto-fix loop: when iframe reports an error, send it to AI to fix (max 3 attempts) */
   const MAX_FIX_ATTEMPTS = 3;
   const CUTE_FIX_MESSAGES = [
-    "小V 发现了一个小虫子 🐛，正在修修补补...",
-    "差一点就好了！小V 再努力一下 💪",
-    "小V 在认真检查每一行魔法咒语 🔮...",
+    t("chat.fixAttempt1", useLanguageStore.getState().language),
+    t("chat.fixAttempt2", useLanguageStore.getState().language),
+    t("chat.fixAttempt3", useLanguageStore.getState().language),
   ];
 
   useEffect(() => {
@@ -174,7 +175,7 @@ export default function ChatPanel() {
     const attempt = incrementFixAttempt();
     if (attempt > MAX_FIX_ATTEMPTS) {
       // Give up gracefully
-      addMessage("assistant", "哎呀，小V 试了好几次还是没弄好，你可以换个说法再告诉我一次吗？ 😅");
+      addMessage("assistant", t("chat.fixGiveUp", useLanguageStore.getState().language));
       resetFixAttempt();
       return;
     }
@@ -208,7 +209,7 @@ export default function ChatPanel() {
             }),
           }).catch(() => {});
         } else {
-          addMessage("assistant", "小V 遇到了点困难，你再说一次试试？");
+          addMessage("assistant", t("chat.fixGiveUpShort", useLanguageStore.getState().language));
           resetFixAttempt();
         }
       } catch {
@@ -223,7 +224,7 @@ export default function ChatPanel() {
   /** Brain button: ask AI to suggest an improvement idea */
   const handleSuggestIdea = useCallback(() => {
     if (!project || isLoading) return;
-    sendMessage("[SUGGEST_IDEA] 帮我想想还能加什么有趣的东西？");
+    sendMessage(t("chat.suggestIdea", useLanguageStore.getState().language));
   }, [project, isLoading, sendMessage]);
 
   const handleVoiceTranscript = useCallback(
@@ -260,7 +261,7 @@ export default function ChatPanel() {
           <div className="flex items-center justify-center h-full text-gray-400">
             <div className="text-center">
               <div className="text-4xl mb-3">💬</div>
-              <p className="text-sm">告诉小V你想做什么吧！</p>
+              <p className="text-sm">{t("chat.emptyHint", useLanguageStore.getState().language)}</p>
             </div>
           </div>
         )}
@@ -293,7 +294,7 @@ export default function ChatPanel() {
                 <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                 <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                 <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                <span className="text-xs text-gray-400 ml-2">正在思考...</span>
+                <span className="text-xs text-gray-400 ml-2">{t("chat.thinking", useLanguageStore.getState().language)}</span>
               </div>
             </div>
           </div>
@@ -317,7 +318,7 @@ export default function ChatPanel() {
               ? "bg-red-500 text-white animate-pulse shadow-lg shadow-red-200"
               : "bg-purple-100 text-purple-600 hover:bg-purple-200"
           } disabled:opacity-50`}
-          title={isRecording ? "停止录音" : "语音输入"}
+          title={isRecording ? t("chat.voiceStop", useLanguageStore.getState().language) : t("chat.voiceStart", useLanguageStore.getState().language)}
         >
           {isRecording ? (
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -339,7 +340,7 @@ export default function ChatPanel() {
             className="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-100 text-yellow-600
               hover:bg-yellow-200 flex items-center justify-center transition-all
               disabled:opacity-50 hover:scale-110 active:scale-95"
-            title="帮我想想新点子！"
+            title={t("chat.ideaTooltip", useLanguageStore.getState().language)}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
@@ -353,7 +354,7 @@ export default function ChatPanel() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="告诉小V你想做什么..."
+          placeholder={t("chat.placeholder", useLanguageStore.getState().language)}
           rows={1}
           disabled={isLoading}
           className="flex-1 resize-none rounded-xl border border-purple-200 px-4 py-2.5 text-sm
@@ -383,7 +384,7 @@ export default function ChatPanel() {
           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
             <path d="M14.016 3.234a.75.75 0 01.75.75v16.032a.75.75 0 01-1.5 0V3.984a.75.75 0 01.75-.75zM18 7.5a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5A.75.75 0 0118 7.5zM10.016 6a.75.75 0 01.75.75v10.5a.75.75 0 01-1.5 0V6.75a.75.75 0 01.75-.75zM6 9a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 016 9z" />
           </svg>
-          小V 说话中
+          {t("chat.speaking", useLanguageStore.getState().language)}
         </div>
       )}
     </div>

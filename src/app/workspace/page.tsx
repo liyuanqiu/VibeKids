@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useProjectStore } from "@/stores/project-store";
 import { useLanguageStore, LANGUAGE_OPTIONS } from "@/stores/language-store";
+import { t } from "@/lib/i18n";
 import type { Project } from "@/types";
 import ChatPanel from "@/components/chat/ChatPanel";
 import PreviewPanel from "@/components/preview/PreviewPanel";
@@ -79,14 +80,14 @@ function WorkspaceInner() {
 
           {project.versions.length > 0 && (
             <span className="text-xs text-gray-400">
-              版本 {project.currentVersion}/{project.versions.length}
+              {t("workspace.version", language)} {project.currentVersion}/{project.versions.length}
             </span>
           )}
           <a
             href="/"
             className="text-xs text-purple-500 hover:text-purple-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-purple-50"
           >
-            首页
+            {t("workspace.home", language)}
           </a>
         </div>
       </header>
