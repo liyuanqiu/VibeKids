@@ -7,16 +7,18 @@ export async function POST(request: NextRequest) {
     const {
       userMessage,
       previousResponseId,
+      language,
     }: {
       userMessage: string;
       previousResponseId: string | null;
+      language?: string;
     } = body;
 
     if (!userMessage || typeof userMessage !== "string") {
       return NextResponse.json({ error: "Missing userMessage" }, { status: 400 });
     }
 
-    const result = await chat({ userMessage, previousResponseId });
+    const result = await chat({ userMessage, previousResponseId, language });
 
     return NextResponse.json({
       ...result.aiResponse,

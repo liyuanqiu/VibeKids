@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useProjectStore } from "@/stores/project-store";
+import { useLanguageStore, LANGUAGE_OPTIONS } from "@/stores/language-store";
 import type { Project } from "@/types";
 import ChatPanel from "@/components/chat/ChatPanel";
 import PreviewPanel from "@/components/preview/PreviewPanel";
@@ -10,6 +11,7 @@ import DebugPanel from "@/components/debug/DebugPanel";
 
 function WorkspaceInner() {
   const { project, createProject } = useProjectStore();
+  const { language, setLanguage } = useLanguageStore();
   const searchParams = useSearchParams();
   const [showDebug, setShowDebug] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -63,6 +65,18 @@ function WorkspaceInner() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {/* Language selector */}
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as typeof language)}
+            className="text-xs bg-white border border-purple-200 text-gray-600 rounded-lg px-2 py-1.5
+              focus:outline-none focus:ring-2 focus:ring-purple-300"
+          >
+            {LANGUAGE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+
           {project.versions.length > 0 && (
             <span className="text-xs text-gray-400">
               版本 {project.currentVersion}/{project.versions.length}

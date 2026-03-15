@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useProjectStore } from "@/stores/project-store";
 import { useDebugStore } from "@/stores/debug-store";
+import { useLanguageStore, LANGUAGE_NAMES } from "@/stores/language-store";
 import { useVoice, speakText } from "@/lib/voice/use-voice";
 import type { AIResponse } from "@/types";
 
@@ -82,12 +83,14 @@ export default function ChatPanel() {
     async (userMessage: string): Promise<(AIResponse & { responseId?: string }) | null> => {
       try {
         const currentProject = useProjectStore.getState().project!;
+        const lang = useLanguageStore.getState().language;
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userMessage,
             previousResponseId: currentProject.lastResponseId,
+            language: LANGUAGE_NAMES[lang],
           }),
         });
 

@@ -57,6 +57,8 @@ function estimateChatCost(inputTokens: number, outputTokens: number, model: stri
 export interface ChatParams {
   userMessage: string;
   previousResponseId: string | null;
+  /** Language name for AI output, e.g. "Chinese (Simplified)" */
+  language?: string;
 }
 
 export interface ChatResult {
@@ -68,7 +70,7 @@ export interface ChatResult {
 export async function chat(params: ChatParams): Promise<ChatResult> {
   const client = getClient();
   const model = process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-5.4";
-  const instructions = buildInstructions();
+  const instructions = buildInstructions(params.language);
 
   const response = await client.responses.create({
     model,
