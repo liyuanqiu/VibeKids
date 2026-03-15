@@ -51,7 +51,7 @@ function WorkspaceInner() {
   if (!project) return null;
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-pink-50">
+    <div className="h-dvh flex flex-col bg-gradient-to-br from-purple-50 via-white to-pink-50 overflow-hidden">
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-3 border-b border-purple-100 bg-white/70 backdrop-blur-sm">
         <div className="flex items-center gap-3">

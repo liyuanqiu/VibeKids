@@ -25,11 +25,21 @@ export function useVoice({ onTranscript }: UseVoiceOptions) {
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-          ? "audio/webm;codecs=opus"
-          : "audio/webm",
-      });
+
+      // Safari/iPad doesn't support webm — pick the best available format
+      let mimeType = "";
+      if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+        mimeType = "audio/webm;codecs=opus";
+      } else if (MediaRecorder.isTypeSupported("audio/webm")) {
+        mimeType = "audio/webm";
+      } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+        mimeType = "audio/mp4";
+      }
+      // If none supported, let browser pick default (no mimeType option)
+
+      const mediaRecorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
 
       chunksRef.current = [];
       mediaRecorder.ondataavailable = (e) => {
@@ -39,11 +49,16 @@ export function useVoice({ onTranscript }: UseVoiceOptions) {
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
 
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        // Use the actual mimeType from the recorder
+        const actualMime = mediaRecorder.mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type: actualMime });
         if (blob.size === 0) return;
 
+        // Determine file extension for the API
+        const ext = actualMime.includes("mp4") ? "recording.mp4" : "recording.webm";
+
         const formData = new FormData();
-        formData.append("audio", blob);
+        formData.append("audio", blob, ext);
 
         try {
           const res = await fetch("/api/stt", { method: "POST", body: formData });
@@ -58,7 +73,8 @@ export function useVoice({ onTranscript }: UseVoiceOptions) {
       };
 
       mediaRecorderRef.current = mediaRecorder;
-      mediaRecorder.start();
+      // Request data every 1s to avoid empty chunks on short recordings
+      mediaRecorder.start(1000);
       setIsRecording(true);
     } catch (err) {
       console.error("Microphone access denied:", err);
@@ -83,6 +99,26 @@ export function useVoice({ onTranscript }: UseVoiceOptions) {
   return { isRecording, startRecording, stopRecording, toggleRecording };
 }
 
+/**
+ * Persistent audio element — reusing the same element avoids
+ * Safari's autoplay restrictions (unlocked on first user interaction).
+ */
+let _audioEl: HTMLAudioElement | null = null;
+function getAudioElement(): HTMLAudioElement {
+  if (!_audioEl) {
+    _audioEl = new Audio();
+    // Unlock audio on first user touch/click (Safari requires this)
+    const unlock = () => {
+      _audioEl!.play().then(() => _audioEl!.pause()).catch(() => {});
+      document.removeEventListener("touchstart", unlock);
+      document.removeEventListener("click", unlock);
+    };
+    document.addEventListener("touchstart", unlock, { once: true });
+    document.addEventListener("click", unlock, { once: true });
+  }
+  return _audioEl;
+}
+
 /** Play TTS audio. Tries OpenAI TTS first, falls back to browser speechSynthesis. */
 export async function speakText(text: string): Promise<void> {
   try {
@@ -93,7 +129,6 @@ export async function speakText(text: string): Promise<void> {
     });
 
     if (res.ok) {
-      // Track TTS usage from response header
       const usageHeader = res.headers.get("X-Usage");
       if (usageHeader) {
         try { trackUsage(JSON.parse(usageHeader)); } catch {}
@@ -102,7 +137,8 @@ export async function speakText(text: string): Promise<void> {
       const audioBlob = await res.blob();
       if (audioBlob.size > 0) {
         const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
+        const audio = getAudioElement();
+        audio.src = audioUrl;
         return new Promise((resolve) => {
           audio.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); };
           audio.onerror = () => { URL.revokeObjectURL(audioUrl); resolve(); };

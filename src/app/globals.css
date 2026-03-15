@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+/* Fix #1 & #5: Full viewport height on mobile (accounts for address bar)
+   and disable all bounce/overscroll effects */
+html, body {
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: auto;
+  position: fixed;
+  width: 100%;
+  touch-action: manipulation;
+}
