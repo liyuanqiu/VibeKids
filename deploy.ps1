@@ -3,29 +3,31 @@
 
 $ErrorActionPreference = "Stop"
 
-# --- Configuration ---
-$TENANT_ID = "30293b88-b515-4a37-b1ca-55335c84e582"
-$SUBSCRIPTION_ID = "69013917-97cc-4e97-a477-49bd131dedb6"
-$RESOURCE_GROUP = "vibekids"
-$LOCATION = "eastus2"
-$APP_NAME = "vibekid"
-$ENV_NAME = "vibekid-env"
-
-# Azure OpenAI settings (read from .env.local — never hardcode secrets)
+# --- Configuration (all read from .env.local) ---
 $envFile = Get-Content .env.local | Where-Object { $_ -match "^\w" }
 $envVars = @{}
 foreach ($line in $envFile) {
     $parts = $line -split "=", 2
     if ($parts.Length -eq 2) { $envVars[$parts[0].Trim()] = $parts[1].Trim() }
 }
+
+# Azure account
+$TENANT_ID = $envVars["AZURE_TENANT_ID"]
+$SUBSCRIPTION_ID = $envVars["AZURE_SUBSCRIPTION_ID"]
+$RESOURCE_GROUP = $envVars["AZURE_RESOURCE_GROUP"]
+$LOCATION = $envVars["AZURE_LOCATION"]
+$APP_NAME = $envVars["AZURE_APP_NAME"]
+$ENV_NAME = $envVars["AZURE_ENV_NAME"]
+
+# Azure OpenAI
 $OPENAI_KEY = $envVars["AZURE_OPENAI_API_KEY"]
 $OPENAI_ENDPOINT = $envVars["AZURE_OPENAI_ENDPOINT"]
 $OPENAI_DEPLOYMENT = $envVars["AZURE_OPENAI_DEPLOYMENT"]
 $OPENAI_TTS = $envVars["AZURE_OPENAI_TTS_DEPLOYMENT"]
 $OPENAI_STT = $envVars["AZURE_OPENAI_STT_DEPLOYMENT"]
 
-if (-not $OPENAI_KEY) {
-    Write-Host "ERROR: .env.local not found or missing AZURE_OPENAI_API_KEY" -ForegroundColor Red
+if (-not $TENANT_ID -or -not $SUBSCRIPTION_ID -or -not $OPENAI_KEY) {
+    Write-Host "ERROR: .env.local is missing required variables. See .env.local.example" -ForegroundColor Red
     exit 1
 }
 
