@@ -1,18 +1,18 @@
 import { create } from "zustand";
 
-export type AppLanguage = "zh-CN" | "en" | "ja";
+export type AppLanguage = "zh-CN" | "zh-TW" | "en";
 
 export const LANGUAGE_OPTIONS: { value: AppLanguage; label: string }[] = [
-  { value: "zh-CN", label: "中文" },
+  { value: "zh-CN", label: "简体中文" },
+  { value: "zh-TW", label: "繁體中文" },
   { value: "en", label: "English" },
-  { value: "ja", label: "日本語" },
 ];
 
 /** Language names used in prompts (English, for AI instructions) */
 export const LANGUAGE_NAMES: Record<AppLanguage, string> = {
   "zh-CN": "Chinese (Simplified)",
+  "zh-TW": "Chinese (Traditional)",
   en: "English",
-  ja: "Japanese",
 };
 
 interface LanguageStore {

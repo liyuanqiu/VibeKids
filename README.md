@@ -1,6 +1,6 @@
 # VibeKid
 
-> A web platform where kids create games, animations, and music by chatting with AI — no coding knowledge needed.
+A web platform where kids create games, animations, and music by chatting with AI — no coding knowledge needed.
 
 ## What is VibeKid?
 
@@ -12,83 +12,37 @@ VibeKid lets kids describe what they want to build in plain language (text or vo
 - **Always playable** — Every AI response produces a runnable version
 - **Kid decides** — All product decisions (colors, rules, speed) are made by the kid
 - **Zero tech exposure** — Code, compilation, and technical concepts are completely hidden
+- **Self-healing** — If generated code has bugs, AI auto-fixes silently (kids see a cute animation)
+- **Learns from mistakes** — Past errors are remembered and prevented in future generations
+
+## Key Features
+
+- Chat with AI via text or voice input
+- Live preview of generated games/animations in a sandboxed iframe
+- Auto-fix: AI retries up to 3 times if code errors (kids see "🔧 fixing..." animation)
+- Error memory: past mistakes are injected into prompts to prevent repeats
+- 💡 Idea button: AI suggests creative improvements
+- Version history: switch between any previous version
+- Project persistence: auto-saved per user, resumable anytime
+- Multi-language: Simplified Chinese, Traditional Chinese, English
+- Touch + keyboard: all generated games support both iPad and desktop by default
+- Debug panel (`?debug=1`): token usage, costs, API logs (draggable)
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 15 (App Router) + TypeScript |
-| Styling | Tailwind CSS v4 |
-| State | Zustand |
-| AI | OpenAI SDK → Azure OpenAI (GPT-5.4 via Responses API) |
-| TTS | gpt-4o-mini-tts (with browser fallback) |
-| STT | gpt-4o-mini-transcribe |
-| Runtime | Sandboxed iframe (HTML/CSS/JS + p5.js, Tone.js) |
-| Storage | File-system based (projects, error memory) |
-| Auth | Cookie-based (simple) |
-
-## Features
-
-- **Chat with AI** — Text or voice input, AI responds with playable code
-- **Live preview** — Sandboxed iframe runs the generated code instantly
-- **Auto-fix** — If code errors, AI automatically retries up to 3 times (kids see a cute "fixing" animation)
-- **Error memory** — Past errors are recorded and injected into prompts to prevent repeat mistakes
-- **Idea suggestions** — 💡 button asks AI to propose creative improvements
-- **Version history** — Every generated version is saved, switchable via dropdown
-- **Project persistence** — Auto-saved to server filesystem per user
-- **Multi-language** — UI and generated content language selectable (Chinese, English, Japanese)
-- **Debug panel** — `?debug=1` shows token usage, costs, and API call logs (draggable)
-- **Touch + keyboard** — All generated games support both iPad touch and desktop keyboard by default
+- **Next.js 15** (App Router) + TypeScript + Tailwind CSS v4
+- **OpenAI SDK** → Azure OpenAI (GPT-5.4 Responses API, gpt-4o-mini-tts, gpt-4o-mini-transcribe)
+- **Zustand** for state management
+- **Sandboxed iframe** runtime with pre-loaded p5.js and Tone.js
+- **File-system storage** for projects and error memory
 
 ## Getting Started
 
-```bash
-# Install dependencies
-npm install
-
-# Copy environment config
-cp .env.local.example .env.local
-# Edit .env.local with your Azure OpenAI credentials
-
-# Start dev server
-npm run dev
-
-# Build
-npm run build
-```
-
-## Environment Variables
-
-```env
-AZURE_OPENAI_API_KEY=your-key
-AZURE_OPENAI_ENDPOINT=https://your-resource.cognitiveservices.azure.com/openai/v1/
-AZURE_OPENAI_DEPLOYMENT=gpt-5.4
-AZURE_OPENAI_TTS_DEPLOYMENT=gpt-4o-mini-tts
-AZURE_OPENAI_STT_DEPLOYMENT=gpt-4o-mini-transcribe
-```
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── api/            # API routes (chat, tts, stt, auth, projects, errors)
-│   ├── login/          # Login page
-│   ├── workspace/      # Main workspace (chat + preview)
-│   └── page.tsx        # Home page (project gallery + inspiration)
-├── components/
-│   ├── chat/           # Chat panel with voice + idea button
-│   ├── preview/        # Sandboxed iframe preview
-│   └── debug/          # Debug panel (tokens, costs, logs)
-├── lib/
-│   ├── ai/             # Centralized OpenAI client + prompts
-│   ├── data/           # File-based persistence (projects, error memory)
-│   ├── runtime/        # iframe engine (code injection, error reporting)
-│   └── voice/          # Voice hooks (recording, TTS playback)
-├── stores/             # Zustand stores (project, debug, language)
-├── middleware.ts        # Auth middleware
-└── types/              # TypeScript types
-```
+1. Clone the repo
+2. `npm install`
+3. Copy `.env.local.example` to `.env.local` and fill in your Azure OpenAI credentials
+4. `npm run dev`
+5. Open `http://localhost:3000`, log in with `test` / `14421`
 
 ## License
 
